@@ -4,9 +4,9 @@
     "private": true,
     "scripts": {
         "dev": "ts-node src/index.ts",
-        "build": "npx prisma migrate deploy && prisma generate && tsc",
+        "build": "prisma generate && tsc",
         "start": "node dist/src/index.js",
-        "vercel-build": "npx prisma migrate deploy && prisma generate && tsc"
+        "vercel-build": "prisma generate && tsc"
     },
     "dependencies": {
         "@prisma/client": "^5.22.0",
