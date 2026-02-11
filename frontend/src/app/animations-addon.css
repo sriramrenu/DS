@@ -1,0 +1,97 @@
+.orb-3 {
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(52, 168, 83, 0.55) 0%, transparent 70%);
+  top: 40%;
+  left: 40%;
+  animation: float-3 16s ease-in-out infinite;
+}
+
+.orb-4 {
+  width: 450px;
+  height: 450px;
+  background: radial-gradient(circle, rgba(251, 188, 4, 0.45) 0%, transparent 70%);
+  top: 20%;
+  right: 15%;
+  animation: float-1 19s ease-in-out infinite reverse;
+}
+
+.orb-5 {
+  width: 550px;
+  height: 550px;
+  background: radial-gradient(circle, rgba(138, 180, 248, 0.4) 0%, transparent 70%);
+  bottom: 30%;
+  left: 20%;
+  animation: float-2 21s ease-in-out infinite reverse;
+}
+
+/* Galaxy Starfield Effect */
+@keyframes twinkle {
+
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+@keyframes move-stars {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+.stars-container {
+  position: absolute;
+  width: 200%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.star {
+  position: absolute;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 0 3px rgba(255, 255, 255, 0.8);
+}
+
+/* Small stars */
+.star.small {
+  width: 1px;
+  height: 1px;
+  animation: twinkle 3s ease-in-out infinite;
+}
+
+/* Medium stars */
+.star.medium {
+  width: 2px;
+  height: 2px;
+  animation: twinkle 4s ease-in-out infinite;
+  box-shadow: 0 0 4px rgba(138, 180, 248, 0.9);
+}
+
+/* Large stars */
+.star.large {
+  width: 3px;
+  height: 3px;
+  animation: twinkle 5s ease-in-out infinite;
+  box-shadow: 0 0 6px rgba(66, 133, 244, 1);
+}
+
+/* Hide Next.js dev indicator */
+#__next-build-watcher,
+nextjs-portal {
+  display: none !important;
+}

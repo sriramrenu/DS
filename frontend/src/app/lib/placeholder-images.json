@@ -1,0 +1,17 @@
+
+{
+  "placeholderImages": [
+    {
+      "id": "team-collaboration",
+      "description": "Teams working together in a competitive environment",
+      "imageUrl": "https://picsum.photos/seed/collaboration/800/600",
+      "imageHint": "teamwork competition"
+    },
+    {
+      "id": "submission-success",
+      "description": "A successful project submission graphic",
+      "imageUrl": "https://picsum.photos/seed/success/600/400",
+      "imageHint": "project success"
+    }
+  ]
+}

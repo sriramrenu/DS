@@ -1,0 +1,64 @@
+.target-cursor-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+    z-index: 9999;
+    mix-blend-mode: difference;
+    /* Remove transform here as GSAP handles x/y */
+}
+
+.target-cursor-dot {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 4px;
+    height: 4px;
+    background: #22c55e;
+    /* Matrix Green */
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    will-change: transform;
+}
+
+.target-cursor-corner {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 12px;
+    height: 12px;
+    border: 2px solid #22c55e;
+    /* Matrix Green */
+    /* ReactBits uses 3px but 2px is cleaner */
+    will-change: transform;
+}
+
+.corner-tl {
+    transform: translate(-100%, -100%);
+    border-right: none;
+    border-bottom: none;
+    border-top-left-radius: 3px;
+}
+
+.corner-tr {
+    transform: translate(0, -100%);
+    border-left: none;
+    border-bottom: none;
+    border-top-right-radius: 3px;
+}
+
+.corner-br {
+    transform: translate(0, 0);
+    border-left: none;
+    border-top: none;
+    border-bottom-right-radius: 3px;
+}
+
+.corner-bl {
+    transform: translate(-100%, 0);
+    border-right: none;
+    border-top: none;
+    border-bottom-left-radius: 3px;
+}

@@ -1,0 +1,14 @@
+node_modules
+.next
+dist
+.env
+*.log
+.DS_Store
+.prisma
+backend/prisma/*.db
+backend/prisma/*.db-journal
+frontend/.next
+frontend/out
+build
+frontend/tsconfig.tsbuildinfo
+backend/tsconfig.tsbuildinfo
