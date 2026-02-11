@@ -1,8 +1,6 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../lib/prisma';
 import { CONFIG } from '../config';
-
-const prisma = new PrismaClient();
 
 // Get dashboard statistics
 export const getDashboardStats = async (req: Request, res: Response) => {

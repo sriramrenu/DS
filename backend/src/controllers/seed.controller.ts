@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
-import { PrismaClient, Group, Role } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { Group, Role } from '@prisma/client';
+import { prisma } from '../lib/prisma';
 
 export const seedDatabase = async (req: Request, res: Response) => {
     try {

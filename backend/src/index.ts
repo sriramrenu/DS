@@ -8,7 +8,14 @@ const PORT = process.env.PORT || 3001;
 
 // Middleware
 app.use(cors({
-    origin: ['http://localhost:3000', 'https://ds-pi-eight.vercel.app'],
+    origin: (origin, callback) => {
+        // Allow local dev and any vercel subdomain
+        if (!origin || origin.startsWith('http://localhost') || origin.endsWith('.vercel.app')) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     credentials: true
 }));
 app.use(express.json({ limit: '50mb' }));

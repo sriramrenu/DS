@@ -1,8 +1,7 @@
 import { Request, Response } from 'express';
-import { PrismaClient, Group } from '@prisma/client';
+import { Group } from '@prisma/client';
+import { prisma } from '../lib/prisma';
 import { supabase } from '../lib/supabase';
-
-const prisma = new PrismaClient();
 
 export const getDashboardData = async (req: Request, res: Response) => {
     // @ts-ignore
