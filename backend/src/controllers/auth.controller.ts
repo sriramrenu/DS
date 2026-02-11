@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { prisma } from '../lib/prisma';
-const jwt = require('jsonwebtoken');
+import * as jwt from 'jsonwebtoken';
+
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecretkey123';
 
 export const login = async (req: Request, res: Response) => {

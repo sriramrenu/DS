@@ -32,6 +32,11 @@ app.get('/api/health', (req: Request, res: Response) => {
     res.json({ status: 'ok', message: 'DataSprint Backend is running' });
 });
 
+// Root route 
+app.get('/', (req: Request, res: Response) => {
+    res.send('<h1>DataSprint Backend is Ready</h1><p>API is available at /api</p>');
+});
+
 // Export app for Vercel
 export default app;
 
