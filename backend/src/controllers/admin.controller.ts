@@ -94,7 +94,7 @@ export const updateScore = async (req: Request, res: Response) => {
 
 // Update multiple team scores at once
 export const updateBatchScores = async (req: Request, res: Response) => {
-    const { updates } = req.body; // Array of { teamId, viz, pred, feat, code, judge }
+    const { updates } = req.body; // Array of { teamId, viz, pred, feat, code, judge } OR { teamId, round1, round2, round3, round4 }
 
     if (!updates || !Array.isArray(updates)) {
         return res.status(400).json({ error: 'Missing or invalid updates array' });
@@ -102,27 +102,38 @@ export const updateBatchScores = async (req: Request, res: Response) => {
 
     try {
         const results = await Promise.all(updates.map(async (u: any) => {
-            const { teamId, viz, pred, feat, code, judge } = u;
-            const total = (viz || 0) + (pred || 0) + (feat || 0) + (code || 0) + (judge || 0);
+            const { teamId, viz, pred, feat, code, judge, round1, round2, round3, round4 } = u;
+
+            // Support both criteria-based and round-based scoring
+            const updateData: any = {};
+            let total = 0;
+
+            // If round-based scores are provided
+            if (round1 !== undefined || round2 !== undefined || round3 !== undefined || round4 !== undefined) {
+                updateData.round1_score = round1 || 0;
+                updateData.round2_score = round2 || 0;
+                updateData.round3_score = round3 || 0;
+                updateData.round4_score = round4 || 0;
+                total = (round1 || 0) + (round2 || 0) + (round3 || 0) + (round4 || 0);
+            }
+            // Otherwise use criteria-based scores (legacy)
+            else {
+                updateData.visualization_score = viz || 0;
+                updateData.prediction_score = pred || 0;
+                updateData.feature_score = feat || 0;
+                updateData.code_score = code || 0;
+                updateData.judges_score = judge || 0;
+                total = (viz || 0) + (pred || 0) + (feat || 0) + (code || 0) + (judge || 0);
+            }
+
+            updateData.total_score = total;
 
             return prisma.score.upsert({
                 where: { teamId },
-                update: {
-                    visualization_score: viz,
-                    prediction_score: pred,
-                    feature_score: feat,
-                    code_score: code,
-                    judges_score: judge,
-                    total_score: total
-                },
+                update: updateData,
                 create: {
                     teamId,
-                    visualization_score: viz,
-                    prediction_score: pred,
-                    feature_score: feat,
-                    code_score: code,
-                    judges_score: judge,
-                    total_score: total
+                    ...updateData
                 }
             });
         }));

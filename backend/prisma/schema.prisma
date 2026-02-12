@@ -49,11 +49,19 @@ model Score {
   teamId       String   @unique
   team         Team     @relation(fields: [teamId], references: [id])
 
+  // Criteria-based scores (legacy)
   visualization_score Float    @default(0)
   prediction_score    Float    @default(0)
   feature_score       Float    @default(0)
   code_score          Float    @default(0)
   judges_score        Float    @default(0)
+  
+  // Round-based scores
+  round1_score        Float    @default(0)
+  round2_score        Float    @default(0)
+  round3_score        Float    @default(0)
+  round4_score        Float    @default(0)
+  
   total_score         Float    @default(0)
   updatedAt    DateTime @updatedAt
 }

@@ -254,20 +254,7 @@ export default function ParticipantDashboard() {
                 </div>
               </CardHeader>
               <CardContent className="space-y-6 relative">
-                {/* Blur Overlay & Message */}
-                {!isSubmissionEnabled && !submitted && (
-                  <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/60 backdrop-blur-md transition-all duration-500 rounded-b-xl">
-                    <div className="bg-green-500/10 border border-green-500/20 p-4 rounded-full mb-4 shadow-[0_0_20px_rgba(34,197,94,0.1)]">
-                      <Lock className="w-8 h-8 text-green-500" />
-                    </div>
-                    <h3 className="text-lg font-bold text-white mb-2">Submission Locked</h3>
-                    <p className="text-sm text-gray-400 text-center px-6">
-                      This portal will unlock automatically during the <span className="text-green-400 font-bold">final 30 minutes</span> of the round.
-                    </p>
-                  </div>
-                )}
-
-                <div className={`${!isSubmissionEnabled && !submitted ? 'opacity-20 pointer-events-none' : ''} transition-all duration-500`}>
+                <div>
                   {submitted ? (
                     <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-6 text-center space-y-3">
                       <CheckCircle2 className="w-12 h-12 text-green-500 mx-auto animate-bounce" />
@@ -343,10 +330,18 @@ export default function ParticipantDashboard() {
                       ))}
                       <Button
                         type="submit"
-                        disabled={loading}
-                        className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg shadow-[0_0_20px_rgba(22,163,74,0.3)] transition-all hover:scale-[1.02] active:scale-[0.98]"
+                        disabled={!isSubmissionEnabled || submitting}
+                        className={`w-full font-bold py-3 rounded-lg transition-all ${isSubmissionEnabled
+                            ? 'bg-green-600 hover:bg-green-700 text-white shadow-[0_0_20px_rgba(22,163,74,0.3)] hover:scale-[1.02] active:scale-[0.98]'
+                            : 'bg-gray-700 text-gray-400 cursor-not-allowed opacity-50'
+                          }`}
                       >
-                        {loading ? (
+                        {!isSubmissionEnabled ? (
+                          <div className="flex items-center gap-2">
+                            <Lock className="w-4 h-4" />
+                            <span>Unlocks in Final 30 Minutes</span>
+                          </div>
+                        ) : submitting ? (
                           <div className="flex items-center gap-2">
                             <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                             <span>Uploading...</span>
@@ -362,7 +357,7 @@ export default function ParticipantDashboard() {
             </MagicCard>
           </div>
         </div>
-      </main>
-    </div>
+      </main >
+    </div >
   );
 }

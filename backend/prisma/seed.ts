@@ -41,6 +41,7 @@ async function main() {
         { code: 'U6ZV7W44', name: 'Hakkuna Matata', group: Group.L2 },
         { code: 'UG7765KP', name: 'Lumora', group: Group.L2 },
         { code: 'U4K83FQ7', name: 'CodeX', group: Group.L2 },
+        { code: 'mec1234', name: 'Codex', group: Group.L2 },
         { code: 'U2Q7D9M7', name: 'Quantum Coders', group: Group.L2 },
         // S1 (13-18)
         { code: 'U49MU29A', name: 'Innovatrix', group: Group.S1 },
