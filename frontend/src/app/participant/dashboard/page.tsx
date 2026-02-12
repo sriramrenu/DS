@@ -8,7 +8,7 @@ import { MagicCard } from '@/components/ui/magic-card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Download, Upload, CheckCircle2, AlertCircle, FileImage, Loader2, Lock } from 'lucide-react';
+import { Download, Upload, CheckCircle2, AlertCircle, FileImage, Loader2, Lock, RefreshCw } from 'lucide-react';
 import { fetchApi } from '@/lib/api';
 
 export default function ParticipantDashboard() {
@@ -27,6 +27,8 @@ export default function ParticipantDashboard() {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [endTime, setEndTime] = useState<string | null>(null);
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null); // seconds
+  const [showUpdateNotification, setShowUpdateNotification] = useState(false);
+  const [updateMessage, setUpdateMessage] = useState('');
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
@@ -101,6 +103,98 @@ export default function ParticipantDashboard() {
     return () => clearInterval(interval);
   }, [endTime]);
 
+  // Auto-refresh polling mechanism
+  useEffect(() => {
+    if (!session) return;
+
+    const pollForUpdates = async () => {
+      try {
+        const data = await fetchApi('/dashboard');
+
+        // Check for changes
+        let hasChanges = false;
+        let changeMessage = '';
+
+        // Check datasets changes
+        const newMainDatasets = data.mainDatasets && Array.isArray(data.mainDatasets)
+          ? data.mainDatasets
+          : (data.datasetUrl ? [data.datasetUrl] : []);
+
+        const newFinalDatasets = data.finalDatasets && Array.isArray(data.finalDatasets)
+          ? data.finalDatasets
+          : (data.finalDatasetUrl ? [data.finalDatasetUrl] : []);
+
+        if (JSON.stringify(newMainDatasets) !== JSON.stringify(mainDatasets)) {
+          hasChanges = true;
+          changeMessage = 'Datasets updated';
+          setMainDatasets(newMainDatasets);
+        }
+
+        if (JSON.stringify(newFinalDatasets) !== JSON.stringify(finalDatasets)) {
+          hasChanges = true;
+          changeMessage = finalDatasets.length === 0 ? 'Phase 2 datasets released!' : 'Datasets updated';
+          setFinalDatasets(newFinalDatasets);
+        }
+
+        // Check round info changes
+        const newRoundTitle = data.title || `Round ${data.round}`;
+        const newTaskDesc = data.description || 'Download your dataset below.';
+
+        if (newRoundTitle !== roundTitle) {
+          hasChanges = true;
+          changeMessage = 'Round information updated';
+          setRoundTitle(newRoundTitle);
+        }
+
+        if (newTaskDesc !== taskDesc) {
+          hasChanges = true;
+          changeMessage = 'Task description updated';
+          setTaskDesc(newTaskDesc);
+        }
+
+        // Check end time changes
+        if (data.endTime !== endTime) {
+          hasChanges = true;
+          changeMessage = 'Time limit updated';
+          setEndTime(data.endTime);
+        }
+
+        // Check questions changes
+        if (JSON.stringify(data.questions) !== JSON.stringify(questions)) {
+          hasChanges = true;
+          changeMessage = 'Questions updated';
+          setQuestions(data.questions || []);
+
+          // Re-initialize answers
+          if (data.questions) {
+            const initialAnswers: Record<string, string> = {};
+            data.questions.forEach((q: any) => initialAnswers[q.id] = '');
+            setAnswers(initialAnswers);
+          }
+        }
+
+        // Show notification if changes detected
+        if (hasChanges) {
+          setUpdateMessage(changeMessage);
+          setShowUpdateNotification(true);
+
+          // Auto-hide after 3 seconds
+          setTimeout(() => {
+            setShowUpdateNotification(false);
+          }, 3000);
+        }
+      } catch (err) {
+        // Silent fail on polling errors to avoid spam
+        console.error('Polling error:', err);
+      }
+    };
+
+    // Poll every 10 seconds
+    const pollInterval = setInterval(pollForUpdates, 10000);
+
+    return () => clearInterval(pollInterval);
+  }, [session, mainDatasets, finalDatasets, roundTitle, taskDesc, endTime, questions]);
+
   const formatTime = (seconds: number) => {
     const h = Math.floor(seconds / 3600);
     const m = Math.floor((seconds % 3600) / 60);
@@ -163,6 +257,16 @@ export default function ParticipantDashboard() {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar role={session.role} username={session.username} />
+
+      {/* Update Notification Banner */}
+      {showUpdateNotification && (
+        <div className="fixed top-20 right-4 z-50 animate-in slide-in-from-top-4 fade-in duration-300">
+          <div className="bg-green-500/90 backdrop-blur-md text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-3 border border-green-400/30">
+            <RefreshCw className="w-5 h-5 animate-spin" />
+            <span className="font-medium">{updateMessage}</span>
+          </div>
+        </div>
+      )}
 
       <main className="flex-1 p-8">
         <div className="max-w-4xl mx-auto space-y-8">
@@ -332,8 +436,8 @@ export default function ParticipantDashboard() {
                         type="submit"
                         disabled={!isSubmissionEnabled || submitting}
                         className={`w-full font-bold py-3 rounded-lg transition-all ${isSubmissionEnabled
-                            ? 'bg-green-600 hover:bg-green-700 text-white shadow-[0_0_20px_rgba(22,163,74,0.3)] hover:scale-[1.02] active:scale-[0.98]'
-                            : 'bg-gray-700 text-gray-400 cursor-not-allowed opacity-50'
+                          ? 'bg-green-600 hover:bg-green-700 text-white shadow-[0_0_20px_rgba(22,163,74,0.3)] hover:scale-[1.02] active:scale-[0.98]'
+                          : 'bg-gray-700 text-gray-400 cursor-not-allowed opacity-50'
                           }`}
                       >
                         {!isSubmissionEnabled ? (
