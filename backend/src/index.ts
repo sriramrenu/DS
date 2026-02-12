@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import cors from 'cors';
 import router from './routes';
 import path from 'path';
+import { prisma } from './lib/prisma';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
