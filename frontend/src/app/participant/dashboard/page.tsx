@@ -29,6 +29,8 @@ export default function ParticipantDashboard() {
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null); // seconds
   const [showUpdateNotification, setShowUpdateNotification] = useState(false);
   const [updateMessage, setUpdateMessage] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
@@ -52,6 +54,7 @@ export default function ParticipantDashboard() {
     // Fetch Dashboard Data
     const init = async () => {
       setIsDataLoading(true);
+      setError(null);
       try {
         const data = await fetchApi('/dashboard');
 
@@ -81,8 +84,13 @@ export default function ParticipantDashboard() {
           data.questions.forEach((q: any) => initialAnswers[q.id] = '');
           setAnswers(initialAnswers);
         }
-      } catch (err) {
-        console.error(err);
+
+        // Clear error on success
+        setError(null);
+        setRetryCount(0);
+      } catch (err: any) {
+        console.error('Dashboard load error:', err);
+        setError(err.message || 'Failed to load dashboard data');
       } finally {
         setIsDataLoading(false);
       }
@@ -189,8 +197,8 @@ export default function ParticipantDashboard() {
       }
     };
 
-    // Poll every 10 seconds
-    const pollInterval = setInterval(pollForUpdates, 10000);
+    // Poll every 60 seconds (reduced from 10s to prevent server overload)
+    const pollInterval = setInterval(pollForUpdates, 60000);
 
     return () => clearInterval(pollInterval);
   }, [session, mainDatasets, finalDatasets, roundTitle, taskDesc, endTime, questions]);
@@ -239,6 +247,31 @@ export default function ParticipantDashboard() {
   };
 
   if (loading || !session) return null;
+
+  // Error state with retry
+  if (error && !isDataLoading) {
+    return (
+      <div className="min-h-screen flex flex-col bg-black">
+        <Navbar role={session.role} username={session.username} />
+        <main className="flex-1 flex items-center justify-center p-8">
+          <div className="max-w-md w-full bg-red-500/10 border border-red-500/20 rounded-lg p-8 text-center space-y-4">
+            <AlertCircle className="w-12 h-12 text-red-500 mx-auto" />
+            <h2 className="text-xl font-bold text-white">Failed to Load Dashboard</h2>
+            <p className="text-gray-400 text-sm">{error}</p>
+            <Button
+              onClick={() => {
+                setRetryCount(retryCount + 1);
+                window.location.reload();
+              }}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              Retry {retryCount > 0 && `(Attempt ${retryCount + 1})`}
+            </Button>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   if (isDataLoading) {
     return (
