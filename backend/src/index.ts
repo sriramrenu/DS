@@ -32,6 +32,16 @@ app.get('/api/health', (req: Request, res: Response) => {
     res.json({ status: 'ok', message: 'DataSprint Backend is running' });
 });
 
+// DB Test
+app.get('/api/db-test', async (req: Request, res: Response) => {
+    try {
+        const count = await prisma.user.count();
+        res.json({ status: 'success', userCount: count });
+    } catch (error: any) {
+        res.status(500).json({ status: 'error', message: error.message, code: error.code });
+    }
+});
+
 // Root route 
 app.get('/', (req: Request, res: Response) => {
     res.send('<h1>DataSprint Backend is Ready</h1><p>API is available at /api</p>');

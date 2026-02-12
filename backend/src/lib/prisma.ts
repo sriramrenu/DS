@@ -6,17 +6,18 @@ const globalForPrisma = global as unknown as { prisma: PrismaClient };
 let dbUrl = process.env.DATABASE_URL || '';
 
 if (dbUrl.includes('Datasprint@2026') || dbUrl.includes(':5432')) {
-    console.log('Detected unencoded password or wrong port in DATABASE_URL. Applying fix...');
-    // 1. Encode the @ sign in the password
+    console.log('Prisma: Detected formatting issues in DATABASE_URL. Applying recovery...');
     dbUrl = dbUrl.replace('Datasprint@2026', 'Datasprint%402026');
-    // 2. Switch from direct port 5432 to pooled port 6543
     dbUrl = dbUrl.replace(':5432', ':6543');
-    // 3. Ensure pgbouncer and sslmode are present
     if (!dbUrl.includes('pgbouncer')) {
         const separator = dbUrl.includes('?') ? '&' : '?';
         dbUrl += `${separator}pgbouncer=true&sslmode=require`;
     }
 }
+
+// Log a safe version of the URL for debugging
+const safeUrl = dbUrl.replace(/:[^:]+@/, ':****@');
+console.log(`Prisma: Connecting with URL: ${safeUrl}`);
 
 export const prisma =
     globalForPrisma.prisma ||
@@ -26,7 +27,7 @@ export const prisma =
                 url: dbUrl,
             },
         },
-        log: ['query', 'error'],
+        log: ['info', 'query', 'warn', 'error'],
     });
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
