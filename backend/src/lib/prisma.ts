@@ -41,7 +41,7 @@ function repairDatabaseUrl(url: string): string {
     // 4. Ensure pooling parameters
     if (!repaired.includes('pgbouncer')) {
         const separator = repaired.includes('?') ? '&' : '?';
-        repaired += `${separator}pgbouncer=true&connection_limit=1`;
+        repaired += `${separator}pgbouncer=true&connection_limit=5&pool_timeout=10`;
     }
 
     return repaired;

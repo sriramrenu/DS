@@ -1,8 +1,9 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-import express, { Request, Response } from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
+import compression from 'compression';
 import router from './routes';
 import path from 'path';
 import { prisma } from './lib/prisma';
@@ -10,7 +11,22 @@ import { prisma } from './lib/prisma';
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Middleware
+// Response time logging middleware
+app.use((req: Request, res: Response, next: NextFunction) => {
+    const start = Date.now();
+    res.on('finish', () => {
+        const duration = Date.now() - start;
+        if (duration > 1000) {
+            console.warn(`Slow request: ${req.method} ${req.path} took ${duration}ms`);
+        }
+    });
+    next();
+});
+
+// Compression Middleware (gzip)
+app.use(compression());
+
+// CORS Middleware
 app.use(cors({
     origin: (origin, callback) => {
         // Allow local dev and any vercel subdomain
