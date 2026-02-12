@@ -26,7 +26,7 @@ function repairDatabaseUrl(url: string): string {
         // Replace direct host with pooler host
         // Note: region needs to match your Supabase project region
         // ap-south-1 is common for Indian projects
-        const poolerHost = `aws-0-ap-south-1.pooler.supabase.com`;
+        const poolerHost = `aws-1-ap-south-1.pooler.supabase.com`;
         repaired = repaired.replace(`db.${projectRef}.supabase.co`, poolerHost);
 
         // Update username from 'postgres' to 'postgres.projectRef' for pooler
