@@ -35,8 +35,13 @@ export const login = async (req: Request, res: Response) => {
                 group: user.team?.group,
             },
         });
-    } catch (error) {
+    } catch (error: any) {
         console.error('LOGIN ERROR:', error);
-        res.status(500).json({ error: 'Login failed', details: (error as Error).message });
+        res.status(500).json({
+            error: 'Login failed',
+            code: error.code, // Prisma error code (e.g., P1001)
+            message: error.message,
+            details: error.meta || 'No additional details'
+        });
     }
 };
