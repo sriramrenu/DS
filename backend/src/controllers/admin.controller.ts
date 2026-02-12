@@ -233,3 +233,33 @@ export const stopRoundTimer = async (req: Request, res: Response) => {
         res.json({ message: 'Timer cleared or already stopped' });
     }
 };
+// Toggle submissions enabled/disabled
+export const toggleSubmissions = async (req: Request, res: Response) => {
+    const { enabled } = req.body;
+
+    if (typeof enabled !== 'boolean') {
+        return res.status(400).json({ error: 'Invalid enabled value. Must be boolean.' });
+    }
+
+    try {
+        await prisma.systemSetting.upsert({
+            where: { key: 'submissions_enabled' },
+            update: { value: enabled ? 'true' : 'false' },
+            create: {
+                key: 'submissions_enabled',
+                value: enabled ? 'true' : 'false',
+            },
+        });
+
+        res.json({
+            success: true,
+            enabled,
+            message: enabled
+                ? 'Submissions have been enabled. Participants can now submit their work.'
+                : 'Submissions have been disabled. Participants cannot submit until re-enabled.'
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Failed to toggle submissions', details: error });
+    }
+};

@@ -8,7 +8,7 @@ import { AdminSidebar } from '@/components/layout/AdminSidebar';
 import { Role, teams, users, tracks } from '@/lib/mock-db';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { MagicCard } from '@/components/ui/magic-card';
-import { PlayCircle, Settings2, Users, FileText, Trophy, Activity, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { PlayCircle, Settings2, Users, FileText, Trophy, Activity, AlertCircle, CheckCircle2, Lock, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
@@ -43,6 +43,8 @@ export default function AdminDashboard() {
   const [timerMinutes, setTimerMinutes] = useState<string>("0");
   const [roundEndTime, setRoundEndTime] = useState<string | null>(null);
   const [isSettingTimer, setIsSettingTimer] = useState(false);
+  const [submissionsEnabled, setSubmissionsEnabled] = useState<boolean>(true);
+  const [isTogglingSubmissions, setIsTogglingSubmissions] = useState(false);
   const [notification, setNotification] = useState<{ open: boolean; title: string; message: string; type: 'success' | 'error' }>({
     open: false,
     title: '',
@@ -90,6 +92,11 @@ export default function AdminDashboard() {
 
       const timerSetting = data.find((s: any) => s.key === 'round_end_time');
       if (timerSetting) setRoundEndTime(timerSetting.value);
+
+      const submissionsSetting = data.find((s: any) => s.key === 'submissions_enabled');
+      if (submissionsSetting) {
+        setSubmissionsEnabled(submissionsSetting.value === 'true');
+      }
     } catch (err) {
       console.error('Failed to fetch settings:', err);
     }
@@ -157,6 +164,34 @@ export default function AdminDashboard() {
       });
     } finally {
       setIsSettingTimer(false);
+    }
+  };
+
+  const toggleSubmissions = async (enabled: boolean) => {
+    setIsTogglingSubmissions(true);
+    try {
+      const data = await fetchApi('/admin/toggle-submissions', {
+        method: 'POST',
+        body: JSON.stringify({ enabled })
+      });
+      setSubmissionsEnabled(enabled);
+      setNotification({
+        open: true,
+        title: enabled ? 'Submissions Enabled' : 'Submissions Disabled',
+        message: data.message || (enabled
+          ? 'Participants can now submit their work.'
+          : 'Participant submissions have been locked.'),
+        type: 'success'
+      });
+    } catch (err: any) {
+      setNotification({
+        open: true,
+        title: 'Error',
+        message: err.message || 'Failed to update submission status.',
+        type: 'error'
+      });
+    } finally {
+      setIsTogglingSubmissions(false);
     }
   };
 
@@ -355,7 +390,55 @@ export default function AdminDashboard() {
               </CardContent>
             </MagicCard>
 
+            {/* Submission Controls */}
+            <MagicCard className="border-amber-500/20 bg-amber-500/5 backdrop-blur-md">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle className="text-amber-400 flex items-center gap-2">
+                    <Lock className="w-5 h-5" />
+                    Submission Controls
+                  </CardTitle>
+                  <p className="text-xs text-amber-400/60">Manually enable or disable participant work submissions.</p>
+                </div>
+                <div className={`flex items-center gap-2 px-4 py-2 rounded-full border ${submissionsEnabled
+                  ? "bg-green-500/10 border-green-500/20 text-green-400"
+                  : "bg-rose-500/10 border-rose-500/20 text-rose-400"
+                  }`}>
+                  {submissionsEnabled ? (
+                    <>
+                      <CheckCircle2 className="w-4 h-4" />
+                      <span className="text-xs font-semibold uppercase tracking-wider">Submissions Active</span>
+                    </>
+                  ) : (
+                    <>
+                      <XCircle className="w-4 h-4" />
+                      <span className="text-xs font-semibold uppercase tracking-wider">Submissions Disabled</span>
+                    </>
+                  )}
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="flex gap-4">
+                  <Button
+                    onClick={() => toggleSubmissions(true)}
+                    disabled={isTogglingSubmissions || submissionsEnabled}
+                    className="flex-1 bg-green-600 hover:bg-green-500 text-white border-none disabled:opacity-50"
+                  >
+                    Enable Submissions
+                  </Button>
+                  <Button
+                    onClick={() => toggleSubmissions(false)}
+                    disabled={isTogglingSubmissions || !submissionsEnabled}
+                    className="flex-1 bg-rose-600 hover:bg-rose-500 text-white border-none disabled:opacity-50"
+                  >
+                    Disable Submissions
+                  </Button>
+                </div>
+              </CardContent>
+            </MagicCard>
+
             <div className="grid md:grid-cols-2 gap-8">
+
               <MagicCard className="border-white/10 bg-black/40 backdrop-blur-md">
                 <CardHeader>
                   <CardTitle className="text-rose-400 flex items-center gap-2">

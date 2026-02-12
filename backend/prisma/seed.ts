@@ -111,6 +111,15 @@ async function main() {
         },
     });
 
+    await prisma.systemSetting.upsert({
+        where: { key: 'submissions_enabled' },
+        update: {},
+        create: {
+            key: 'submissions_enabled',
+            value: 'true',
+        },
+    });
+
     // 5. Create Round Content (Specialized for Logistics Tracks L1/L2)
     const rounds = [
         {

@@ -5,7 +5,7 @@ import { login } from '../controllers/auth.controller';
 import { seedDatabase } from '../controllers/seed.controller';
 import { getDashboardData, submitWork } from '../controllers/dashboard.controller';
 import { authenticateToken, authorize } from '../middleware/auth.middleware';
-import { getSubmissions, updateScore, getScores, getMembers, updateBatchScores, getSystemSettings, initiateRound, setRoundTimer, stopRoundTimer } from '../controllers/admin.controller';
+import { getSubmissions, updateScore, getScores, getMembers, updateBatchScores, getSystemSettings, initiateRound, setRoundTimer, stopRoundTimer, toggleSubmissions } from '../controllers/admin.controller';
 import { getDashboardStats } from '../controllers/stats.controller';
 
 const router = Router();
@@ -33,5 +33,6 @@ router.get('/admin/settings', authenticateToken, authorize(['Admin']), getSystem
 router.post('/admin/initiate-round', authenticateToken, authorize(['Admin']), initiateRound);
 router.post('/admin/set-timer', authenticateToken, authorize(['Admin']), setRoundTimer);
 router.post('/admin/stop-timer', authenticateToken, authorize(['Admin']), stopRoundTimer);
+router.post('/admin/toggle-submissions', authenticateToken, authorize(['Admin']), toggleSubmissions);
 
 export default router;

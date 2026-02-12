@@ -118,6 +118,11 @@ export const getDashboardData = async (req: Request, res: Response) => {
         // Set cache-control headers for client-side caching
         res.setHeader('Cache-Control', 'private, max-age=30, stale-while-revalidate=60');
 
+        // Check if submissions are enabled
+        const submissionsEnabled = await prisma.systemSetting.findUnique({
+            where: { key: 'submissions_enabled' }
+        });
+
         res.json({
             round: currentRound,
             title: roundContent.title,
@@ -131,7 +136,8 @@ export const getDashboardData = async (req: Request, res: Response) => {
             datasetName: dataset1Path.split('/').pop(),
             finalDatasetUrl: finalDataset1Url,
             taskDescription: `Round ${currentRound}: ${roundContent.title}`,
-            endTime: timerValue || null
+            endTime: timerValue || null,
+            submissionsEnabled: submissionsEnabled?.value === 'true'
         });
 
     } catch (error) {
@@ -144,6 +150,15 @@ export const submitWork = async (req: Request, res: Response) => {
     // @ts-ignore
     const { teamId, group } = req.user;
     const file = req.file; // From Multer
+
+    // Check if submissions are enabled
+    const submissionsEnabled = await prisma.systemSetting.findUnique({
+        where: { key: 'submissions_enabled' }
+    });
+
+    if (submissionsEnabled?.value !== 'true') {
+        return res.status(403).json({ error: 'Submissions are currently disabled by the admin.' });
+    }
 
     if (!file) {
         return res.status(400).json({ error: 'No file uploaded' });

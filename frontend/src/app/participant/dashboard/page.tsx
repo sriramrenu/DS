@@ -31,6 +31,7 @@ export default function ParticipantDashboard() {
   const [updateMessage, setUpdateMessage] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
+  const [submissionsEnabled, setSubmissionsEnabled] = useState<boolean>(true);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
@@ -78,12 +79,13 @@ export default function ParticipantDashboard() {
         setQuestions(data.questions || []);
         setEndTime(data.endTime);
 
-        // Initialize answers
         if (data.questions) {
           const initialAnswers: Record<string, string> = {};
           data.questions.forEach((q: any) => initialAnswers[q.id] = '');
           setAnswers(initialAnswers);
         }
+
+        setSubmissionsEnabled(data.submissionsEnabled !== false);
 
         // Clear error on success
         setError(null);
@@ -160,11 +162,16 @@ export default function ParticipantDashboard() {
           setTaskDesc(newTaskDesc);
         }
 
-        // Check end time changes
         if (data.endTime !== endTime) {
           hasChanges = true;
           changeMessage = 'Time limit updated';
           setEndTime(data.endTime);
+        }
+
+        // Check submission enabled changes
+        if (data.submissionsEnabled !== undefined && data.submissionsEnabled !== submissionsEnabled) {
+          setSubmissionsEnabled(data.submissionsEnabled);
+          // Don't trigger hasChanges/notification for this as it's reflected in button state
         }
 
         // Check questions changes
@@ -467,13 +474,20 @@ export default function ParticipantDashboard() {
                       ))}
                       <Button
                         type="submit"
-                        disabled={!isSubmissionEnabled || submitting}
-                        className={`w-full font-bold py-3 rounded-lg transition-all ${isSubmissionEnabled
-                          ? 'bg-green-600 hover:bg-green-700 text-white shadow-[0_0_20px_rgba(22,163,74,0.3)] hover:scale-[1.02] active:scale-[0.98]'
-                          : 'bg-gray-700 text-gray-400 cursor-not-allowed opacity-50'
+                        disabled={!isSubmissionEnabled || !submissionsEnabled || submitting || submitted}
+                        className={`w-full font-bold py-3 rounded-lg transition-all ${(!isSubmissionEnabled || !submissionsEnabled)
+                          ? 'bg-gray-700 text-gray-400 cursor-not-allowed opacity-50'
+                          : submitted
+                            ? 'bg-green-600/20 text-green-400 border border-green-500/30 font-bold'
+                            : 'bg-green-600 hover:bg-green-700 text-white shadow-[0_0_20px_rgba(22,163,74,0.3)] hover:scale-[1.02] active:scale-[0.98]'
                           }`}
                       >
-                        {!isSubmissionEnabled ? (
+                        {!submissionsEnabled ? (
+                          <div className="flex items-center gap-2">
+                            <Lock className="w-4 h-4" />
+                            <span>Submissions Locked by Admin</span>
+                          </div>
+                        ) : !isSubmissionEnabled ? (
                           <div className="flex items-center gap-2">
                             <Lock className="w-4 h-4" />
                             <span>Unlocks in Final 30 Minutes</span>
@@ -482,6 +496,11 @@ export default function ParticipantDashboard() {
                           <div className="flex items-center gap-2">
                             <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                             <span>Uploading...</span>
+                          </div>
+                        ) : submitted ? (
+                          <div className="flex items-center gap-2">
+                            <CheckCircle2 className="w-4 h-4 text-green-400" />
+                            <span>Submitted Successfully</span>
                           </div>
                         ) : (
                           'Submit Round Work'
